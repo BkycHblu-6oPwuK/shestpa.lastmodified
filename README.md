@@ -9,10 +9,6 @@
 ## Использование
 После установки модуля необходимо его подключить в файле init.php с помощью методов API 1С-Битрикс и вызвать метод регистрации обработчика:
 ```php
-
-```
-и вызвать метод регистрации обработчика:
-```php
 if (\Bitrix\Main\Loader::includeModule('shestpa.lastmodified')) {
     \Shestpa\LastModified\LastModifiedHelper::registerEvent();
 }
