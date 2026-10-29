@@ -26,7 +26,7 @@ if(\Bitrix\Main\Loader::includeModule('shestpa.lastmodified')) {
 }
 ```
 
-остановить применение заголовка Last-Modified можно с помощью метода:
+остановить применение заголовка Last-Modified на текущем запросе можно с помощью метода:
 ```php
 \Shestpa\LastModified\LastModifiedHelper::enableStopSetLastModified();
 ```
