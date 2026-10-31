@@ -41,6 +41,8 @@ if(\Bitrix\Main\Loader::includeModule('shestpa.lastmodified')) {
 \Shestpa\LastModified\LastModifiedHelper::onEndBufferContent($content);
 ```
 
+`\Shestpa\LastModified\LastModifiedAjaxHelper` - вспомогательный класс для работы с AJAX-запросами, его можно применять в контроллерах, в нем упрощена проверка и установка заголовка Last-Modified для AJAX-ответов.
+
 ## Исключения
 Модуль не устанавливает заголовки для:
 - страниц административного раздела

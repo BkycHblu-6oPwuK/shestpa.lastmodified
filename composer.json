@@ -1,0 +1,8 @@
+{
+    "name": "shestpa/shestpa.lastmodified",
+    "description": "lastmodified for bitrix",
+    "type": "bitrix-module",
+    "license": "MIT",
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

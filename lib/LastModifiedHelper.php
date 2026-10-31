@@ -2,7 +2,6 @@
 
 namespace Shestpa\Lastmodified;
 
-use Bitrix\Main\Config\Option;
 use Bitrix\Main\Context;
 use Bitrix\Main\Type\DateTime;
 use Bitrix\Main\HttpResponse;
@@ -41,17 +40,22 @@ class LastModifiedHelper
     /**
      * Обработчик main:OnEndBufferContent
      * @param string $content
+     * @param HttpResponse|null $response HTTP-ответ, для которого устанавливается Last-Modified
      * @return void
      */
-    public static function onEndBufferContent(&$content)
+    public static function onEndBufferContent(&$content, $response = null)
     {
         if (!static::isApplicable($content)) {
             return;
         }
 
         $context  = Context::getCurrent();
-        $response = $context->getResponse();
-
+        if ($response === null) {
+            /**
+             * @var HttpResponse $response
+             */
+            $response = $context->getResponse();
+        }
         if (static::isLastModifiedSet($response)) {
             return;
         }
@@ -104,10 +108,6 @@ class LastModifiedHelper
                 $response->setStatus('304 Not Modified');
                 $content = '';
             }
-
-            if (Option::get(static::MODULE_ID, 'debug', 'N') === 'Y') {
-                $response->addHeader('Hash-Modified', $status . $hash);
-            }
         } catch (\Exception $e) {
             AddMessage2Log($e->getMessage(), static::MODULE_ID);
         } catch (\Throwable $e) {
@@ -146,7 +146,7 @@ class LastModifiedHelper
 
     public static function registerEvent()
     {
-        if (self::$registered || self::isCli()) {
+        if (static::$registered || static::isCli()) {
             return false;
         }
 
@@ -162,7 +162,7 @@ class LastModifiedHelper
             1
         );
 
-        self::$registered = true;
+        static::$registered = true;
 
         return true;
     }
@@ -189,10 +189,13 @@ class LastModifiedHelper
         if (static::isCli()) {
             return false;
         }
-        if (defined('ADMIN_SECTION') || defined('ERROR_404') || defined('PUBLIC_AJAX_MODE')) {
+        if (defined('ADMIN_SECTION') || defined('ERROR_404')) {
             return false;
         }
         if (!is_object($USER) || !is_object($APPLICATION)) {
+            return false;
+        }
+        if ($APPLICATION->GetShowIncludeAreas()) {
             return false;
         }
         if ($USER->IsAdmin()) {
@@ -204,7 +207,7 @@ class LastModifiedHelper
         if (!in_array($request->getRequestMethod(), array('GET', 'HEAD'), true)) {
             return false;
         }
-        if ($request->isAjaxRequest()) {
+        if (static::ajaxCheck($request)) {
             return false;
         }
 
@@ -213,14 +216,35 @@ class LastModifiedHelper
             return false;
         }
 
-        if ($APPLICATION->GetShowIncludeAreas()) {
-            return false;
-        }
+        return static::dirsCheck() && static::typeContentCheck($content);
+    }
+
+    /**
+     * @return bool
+     */
+    protected static function dirsCheck()
+    {
         if (\CSite::InDir('/personal/') || \CSite::InDir('/bitrix/')) {
             return false;
         }
+        return true;
+    }
 
+    /**
+     * @param string $content
+     * @return bool
+     */
+    protected static function typeContentCheck($content)
+    {
         return stripos($content, '</html>') !== false;
+    }
+
+    /**
+     * @param \Bitrix\Main\HttpRequest $request
+     */
+    protected static function ajaxCheck($request)
+    {
+        return $request->isAjaxRequest() || defined('PUBLIC_AJAX_MODE');
     }
 
     /**
