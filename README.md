@@ -6,6 +6,28 @@
 
 При установке создается агент очистки таблицы (`\Shestpa\Lastmodified\CleanupAgent::exec();`), удаляются записи страниц к которым не обращались 30 дней
 
+установка через композер:
+
+добавьте в composer.json экстра опцию, чтобы композер поставил пакет в local/modules (или bitrix)
+
+добавьте репозиторий с модулем в секцию "repositories" вашего composer.json, если его там нет, с актуальной ссылкой на репозиторий
+
+```json
+"extra": {
+  "installer-paths": {
+    "local/modules/{$name}/": ["type:bitrix-module"]
+  }
+}
+"repositories": [
+  {
+      "type": "vcs",
+      "url": "git@github.com:BkycHblu-6oPwuK/shestpa.lastmodified.git"
+  }
+]
+```
+
+или вручную скопируйте модуль в директорию /local(/bitrix)/modules вашего проекта.
+
 ## Использование
 После установки модуля необходимо его подключить в файле init.php с помощью методов API 1С-Битрикс и вызвать метод регистрации обработчика:
 ```php
